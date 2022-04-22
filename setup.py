@@ -7,7 +7,8 @@ setup(
     version='0.0.0',
     packages=[PACKAGE_NAME],
     data_files=[
-        ('share/' + PACKAGE_NAME + '/resource', ['resource/axis_scaling.ui']),
+        ('share/' + PACKAGE_NAME + '/resource',
+         ['resource/axis_scaling.ui', 'resource/axis_config_widget.ui']),
         ('share/ament_index/resource_index/packages',
          ['resource/' + PACKAGE_NAME]),
         ('share/' + PACKAGE_NAME, ['package.xml']),
