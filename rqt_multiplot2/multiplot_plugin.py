@@ -1,4 +1,5 @@
 from rqt_gui_py.plugin import Plugin
+import rqt_gui.ros2_plugin_context
 from rqt_py_common.plugin_container_widget import PluginContainerWidget
 from rqt_multiplot2.multiplot_widget import MultiplotWidget
 
@@ -6,7 +7,7 @@ from rqt_multiplot2.multiplot_widget import MultiplotWidget
 class MultiplotPlugin(Plugin):
     """RQt plugin to create multiple plots
     """
-    def __init__(self, context):
+    def __init__(self, context: rqt_gui.ros2_plugin_context.PluginContext):
         super().__init__(context)
         self.setObjectName('MultiplotPlugin')
         self._plugin_widget = MultiplotWidget(context=context)
