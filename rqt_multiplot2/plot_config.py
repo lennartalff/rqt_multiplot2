@@ -191,10 +191,9 @@ class AxisConfig(Config):
 
 class AxisScalingWidget(QtWidgets.QWidget):
     """Widget to configure the axis scaling."""
-    config: AxisScalingConfig = None
-
     def __init__(self, parent=None):
         super().__init__(parent)
+        self._config: AxisScalingConfig = None
         _, pkg_path = get_resource('packages', 'rqt_multiplot2')
         ui_file = os.path.join(pkg_path, 'share', 'rqt_multiplot2', 'resource',
                                'axis_scaling.ui')
@@ -212,6 +211,9 @@ class AxisScalingWidget(QtWidgets.QWidget):
         self.ui.max_edit.editingFinished.connect(self._max_edit_finished)
         self._init_type_combobox()
 
+        self.ui.type_combobox.currentTextChanged.connect(
+            self._type_combobox_changed)
+
     @QtCore.pyqtSlot(object)
     def set_config(self, config: AxisScalingConfig):
         """Set a new configuration for the axis.
@@ -219,16 +221,20 @@ class AxisScalingWidget(QtWidgets.QWidget):
         Args:
             config (AxisScalingConfig): The new configuration.
         """
-        if self.config is config:
+        if self._config is config:
             return
-        if isinstance(self.config, AxisScalingConfig):
-            self.config.deleteLater()
-        self.config = config
-        self.config.scaling_type_changed.connect(self._config_type_changed)
-        self.config.lower_limit_changed.connect(
+        if isinstance(self._config, AxisScalingConfig):
+            self._config.deleteLater()
+        self._config = config
+        self._config.scaling_type_changed.connect(self._config_type_changed)
+        self._config.lower_limit_changed.connect(
             self._config_lower_limit_changed)
-        self.config.upper_limit_changed.connect(
+        self._config.upper_limit_changed.connect(
             self._config_upper_limit_changed)
+
+    @QtCore.pyqtSlot()
+    def get_config(self):
+        return self._config
 
     def _select_type_combobox_item(self, value: AxisScalingConfig.ScalingType):
         index = self.ui.type_combobox.findText(str(value))
@@ -243,7 +249,7 @@ class AxisScalingWidget(QtWidgets.QWidget):
         for scaling_type in AxisScalingConfig.ScalingType:
             items.append(str(scaling_type))
         self.ui.type_combobox.addItems(items)
-        self._select_type_combobox_item(self.config.get_scaling_type())
+        self._select_type_combobox_item(self._config.get_scaling_type())
 
     @QtCore.pyqtSlot(object)
     def _config_type_changed(self, value: AxisScalingConfig.ScalingType):
@@ -264,7 +270,7 @@ class AxisScalingWidget(QtWidgets.QWidget):
         except ValueError:
             val = 0.0
             self.ui.min_edit.setText(f'{val}')
-        self.config.set_lower_limit(val)
+        self._config.set_lower_limit(val)
 
     @QtCore.pyqtSlot()
     def _max_edit_finished(self):
@@ -273,7 +279,13 @@ class AxisScalingWidget(QtWidgets.QWidget):
         except ValueError:
             val = 0.0
             self.ui.max_edit.setText(f'{val}')
-        self.config.set_upper_limit(val)
+        self._config.set_upper_limit(val)
+
+    @QtCore.pyqtSlot(str)
+    def _type_combobox_changed(self, text: str):
+        for scaling_type in AxisScalingConfig.ScalingType:
+            if str(scaling_type) == text:
+                self._config.set_scaling_type(scaling_type)
 
 
 class AxisConfigWidget(QtWidgets.QWidget):
@@ -288,6 +300,6 @@ class AxisConfigWidget(QtWidgets.QWidget):
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication([])
-    w = AxisScalingWidget()
+    w = AxisConfigWidget()
     w.show()
     app.exec()
